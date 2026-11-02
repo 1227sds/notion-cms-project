@@ -1,0 +1,58 @@
+{
+  "project": "개인 레시피 북 (Notion CMS)",
+  "source": "docs/ROADMAP.md",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "프로젝트 초기 설정 (골격)",
+      "status": "completed",
+      "tasks": [
+        { "name": "Next.js 프로젝트 구조", "status": "completed" },
+        { "name": "Notion API 환경 구축", "status": "completed" },
+        { "name": "기본 레이아웃", "status": "completed" }
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "공통 모듈 개발",
+      "status": "completed",
+      "tasks": [
+        { "name": "공통 API 함수", "status": "completed" },
+        { "name": "재사용 컴포넌트", "status": "completed" },
+        { "name": "타입 정의", "status": "completed" }
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "핵심 기능 개발",
+      "status": "completed",
+      "tasks": [
+        { "name": "레시피 목록 페이지", "status": "completed" },
+        { "name": "레시피 상세 페이지", "status": "completed" },
+        { "name": "카테고리 필터 및 카테고리 페이지", "status": "completed" }
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "추가 기능 개발",
+      "status": "pending",
+      "tasks": [
+        { "name": "검색 (/search?q=)", "status": "pending" },
+        { "name": "카테고리 필터 보강", "status": "pending" },
+        { "name": "태그 페이지 (/tags/[tag])", "status": "pending" },
+        { "name": "즐겨찾기 (localStorage)", "status": "pending" },
+        { "name": "인분 수 계산 (선택)", "status": "pending" },
+        { "name": "장보기 리스트 (선택)", "status": "pending" }
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "최적화 및 배포",
+      "status": "pending",
+      "tasks": [
+        { "name": "성능 최적화 (이미지, Lighthouse, ISR, 접근성, 메타데이터)", "status": "pending" },
+        { "name": "Vercel 배포 (연결, 환경변수, 빌드 검증, ISR 반영 확인)", "status": "pending" }
+      ]
+    }
+  ]
+}
