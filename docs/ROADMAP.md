@@ -1,45 +1,185 @@
 # 🗺️ 개발 로드맵: 개인 레시피 북
 
-## Phase 0. 문서
+> 기준 문서: [`docs/PRD.md`](./PRD.md)
+> Notion 데이터베이스를 CMS로 사용하는 개인 레시피 웹사이트 (Next.js App Router + ISR + Vercel)
 
-- [x] `docs/PRD.md` 작성
-- [x] `docs/ROADMAP.md` 작성
+## 📊 전체 개요
 
-## Phase 1. 패키지·환경 설정
+| 단계 | 내용                                 | 예상 소요 | 상태       |
+| ---- | ------------------------------------ | --------- | ---------- |
+| 1    | 프로젝트 골격 (구조, 환경 설정)      | 0.5일     | ✅ 완료    |
+| 2    | 공통 모듈 (모든 기능에서 쓰는 것들)  | 1일       | ✅ 완료    |
+| 3    | 핵심 기능 (가장 중요한 기능)         | 1.5일     | ✅ 완료    |
+| 4    | 추가 기능 (부가적인 기능)            | 2~3일     | ⏳ 대기    |
+| 5    | 최적화 및 배포                       | 1일       | 🔄 진행 중 |
 
-- [x] 최신 버전 업데이트 (Next, React, lucide-react, @hookform/resolvers)
-- [x] `@notionhq/client`, `notion-to-md`, `react-markdown`, `remark-gfm` 설치
-- [x] `src/lib/env.ts`에 Notion 환경변수 추가
-- [x] `.env.example`, `.env.local` 추가
+**총 예상 소요: 약 6~7일** (핵심 기능까지는 약 3일)
+
+```
+1. 골격 → 2. 공통 모듈 → 3. 핵심 기능 → 4. 추가 기능 → 5. 최적화·배포
+ (바닥)    (재사용 기반)    (MVP)          (부가)         (출시)
+```
+
+각 단계는 앞 단계 위에 쌓인다. 아래 단계가 흔들리면 위 단계 작업이 모두 다시 필요해진다.
+
+---
+
+## 1단계. 프로젝트 골격 (구조, 환경 설정)
+
+### 💡 왜 이 순서인가?
+
+패키지, 환경변수, 폴더·라우트 구조가 정해져야 이후 모든 코드를 실행하고 검증할 수 있다. 특히 Notion 연동은 API 키와 DB ID 없이는 아무것도 확인할 수 없다. 나중에 바꾸면 모든 파일의 import 경로와 설정이 영향을 받으므로 가장 먼저 확정한다.
+
+### 🛠️ 작업 목록
+
+**환경 설정**
+
+- [x] `docs/PRD.md`, `docs/ROADMAP.md` 작성
+- [x] 최신 버전 업데이트 (Next.js, React, lucide-react, @hookform/resolvers)
+- [x] 의존성 설치: `@notionhq/client`, `notion-to-md`, `react-markdown`, `remark-gfm`
+- [x] 환경변수 정의: `src/lib/env.ts`, `.env.example`, `.env.local`
 - [x] `next.config.ts`에 Notion 이미지 `remotePatterns` 추가
+- [x] Notion 데이터베이스 생성 및 Integration 연결 (PRD 속성 구조 준수)
 
-## Phase 2. Notion 클라이언트 레이어
+**프로젝트 구조**
 
-- [x] `src/lib/notion/client.ts`
-- [x] `src/lib/notion/types.ts`
-- [x] `src/lib/notion/recipes.ts` (목록, 상세, 카테고리, 본문 마크다운)
+- [x] 스타터 불필요 코드 제거 (로그인/회원가입 페이지·폼)
+- [x] 라우트 구조 확정: `(site)` 그룹 아래 `/`, `/category/[category]`, `/recipes/[slug]`
+- [x] 폴더 구조 정리: `src/lib/notion/`, `src/components/recipes/`, `src/components/layout/`
 
-## Phase 3. 목록 페이지
+### ⏱️ 예상 소요: 0.5일
 
-- [x] 홈 카드 그리드 (`/`)
-- [x] 카테고리 필터 및 카테고리 페이지
+### ✅ 완료 기준
+
+- `npm run dev`가 오류 없이 실행된다
+- 환경변수 누락 시 명확한 안내가 표시된다
+- Notion Integration이 DB에 접근할 수 있다
+
+---
+
+## 2단계. 공통 모듈 (모든 기능에서 쓰는 것들)
+
+### 💡 왜 이 순서인가?
+
+목록·상세·카테고리 페이지는 모두 같은 Notion 데이터 레이어, 레이아웃, 카드 UI를 쓴다. 이를 먼저 만들어 두면 핵심 기능 단계에서 페이지를 조립만 하면 되고, 같은 코드를 페이지마다 중복 구현하지 않는다. Notion 스키마가 바뀌어도 이 단계의 한 곳만 고치면 된다. 반대로 핵심 기능을 먼저 만들면 공통 부분이 페이지 안에 흩어져 나중에 뽑아내는 재작업이 생긴다.
+
+### 🛠️ 작업 목록
+
+**데이터 레이어 (`src/lib/notion/`)**
+
+- [x] `client.ts`: Notion 클라이언트 초기화
+- [x] `types.ts`: `Recipe` 타입과 Notion 속성 → 도메인 모델 변환
+- [x] `recipes.ts`: 목록 / 단건(슬러그) / 카테고리 목록 / 본문 마크다운 조회
+  - Status가 `발행됨`인 항목만 노출, Published 최신순 정렬
+  - Slug가 비어 있으면 페이지 ID 사용, Cover가 없으면 페이지 커버 사용
+
+**레이아웃·공통 UI**
+
+- [x] 헤더·푸터·네비게이션을 레시피 북에 맞게 수정 (`src/components/layout`, `navigation`)
+- [x] shadcn/ui 기본 컴포넌트 (Card, Badge, Skeleton, Alert 등)
+- [x] `RecipeCard`, `RecipeGrid` (1 → 2 → 3열 반응형)
+- [x] `NotionSetupNotice` (환경변수 미설정 안내)
+
+### ⏱️ 예상 소요: 1일
+
+### ✅ 완료 기준
+
+- 데이터 함수가 타입 안전하게 `Recipe` 객체를 반환한다
+- 공통 컴포넌트가 실제 데이터로 렌더링된다
+- `npm run check-all` 통과
+
+---
+
+## 3단계. 핵심 기능 (가장 중요한 기능)
+
+### 💡 왜 이 순서인가?
+
+공통 모듈이 준비되어 있어야 페이지는 조립 작업만 남는다. PRD의 MVP인 목록 + 상세 + 카테고리 필터가 이 서비스의 핵심 가치이므로, 부가 기능보다 먼저 완성해 빠르게 검증한다. 4단계의 검색·태그·즐겨찾기는 모두 이 화면과 데이터 위에서만 의미가 있다.
+
+### 🛠️ 작업 목록
+
+- [x] **홈 `/`**: 최근 레시피 카드 그리드
+- [x] **카테고리 필터** (`CategoryFilter`) 및 **카테고리 페이지 `/category/[category]`**
+- [x] **상세 `/recipes/[slug]`**: 메타 정보(카테고리, 조리시간, 난이도, 태그) + 본문
+- [x] 마크다운 본문 렌더링 (`RecipeContent`: `react-markdown` + `remark-gfm`)
+- [x] ISR 설정: 각 페이지 `revalidate = 1800`
+- [x] `generateStaticParams`, `generateMetadata` (SEO)
 - [x] `loading.tsx`, `not-found.tsx`
+- [x] `sitemap.ts`, `robots.ts`
 
-## Phase 4. 상세 페이지
+### ⏱️ 예상 소요: 1.5일
 
-- [x] `/recipes/[slug]` 구현
-- [x] 마크다운 본문 렌더링
-- [x] `generateStaticParams`, `generateMetadata`
+### ✅ 완료 기준
 
-## Phase 5. 스타일링·최적화
+- Notion에서 `발행됨`으로 바꾼 레시피가 목록·상세에 표시된다 (`초안`은 보이지 않음)
+- 카테고리 필터와 카테고리 페이지가 정상 동작한다
+- 존재하지 않는 슬러그는 404로 처리된다
+- 모바일·태블릿·데스크톱에서 레이아웃이 깨지지 않는다
+- 실제 Notion 데이터로 검증 완료
 
-- [x] 헤더·푸터·네비게이션을 레시피 북에 맞게 수정
-- [x] 반응형 확인
-- [x] Notion 연동 후 실제 데이터로 검증
-- [ ] Vercel 배포 및 환경변수 등록
+---
 
-## Phase 6. 확장 (선택)
+## 4단계. 추가 기능 (부가적인 기능)
 
-- [ ] 검색
-- [ ] 태그 페이지
-- [ ] 즐겨찾기
+### 💡 왜 이 순서인가?
+
+모두 PRD의 "확장 후보"이며 없어도 서비스는 동작한다. 핵심 기능이 안정된 뒤에 추가해야 기능 간 영향 범위를 파악하기 쉽고, 핵심이 바뀔 때 부가 기능까지 다시 고치는 일을 피할 수 있다. 구현 난이도 대비 효용이 큰 순서로 진행한다.
+
+### 🛠️ 작업 목록 (우선순위 순)
+
+- [ ] **태그 페이지** `/tags/[tag]`: 기존 목록 컴포넌트 재사용 (0.5일)
+- [ ] **검색**: 제목·태그 기준 (1일)
+- [ ] **즐겨찾기**: localStorage 저장, 즐겨찾기 목록 보기 (0.5일)
+- [ ] **인분 수 계산**: 재료 수량 비례 조정 (1일, 선택)
+- [ ] **장보기 리스트**: 재료 체크 및 모아보기 (1일, 선택)
+
+### ⏱️ 예상 소요: 2~3일 (선택 기능 제외 시 2일)
+
+### ✅ 완료 기준
+
+- 각 기능이 독립적으로 동작하고 핵심 기능에 회귀가 없다
+- 새 라우트가 `sitemap.ts`에 반영된다
+- `npm run check-all` 통과
+
+---
+
+## 5단계. 최적화 및 배포
+
+### 💡 왜 이 순서인가?
+
+기능이 확정되기 전에 최적화하면 코드가 바뀔 때마다 다시 해야 한다. 성능·접근성 측정과 배포 환경 검증(환경변수, ISR 동작)은 모든 기능이 갖춰진 상태에서 한 번에 하는 것이 효율적이다.
+
+### 🛠️ 작업 목록
+
+**최적화**
+
+- [ ] 이미지 최적화 점검 (`next/image`, 적절한 `sizes`, Notion 이미지 URL 만료 대응)
+- [ ] Lighthouse 점검 (Performance / Accessibility / SEO ≥ 90)
+- [ ] ISR `revalidate` 주기(현재 1800초) 및 캐시 전략 확정
+- [ ] 접근성 점검 (alt 텍스트, 키보드 탐색, 명도 대비)
+- [ ] 메타데이터·OG 이미지 점검
+
+**배포**
+
+- [ ] Vercel 프로젝트 연결
+- [ ] Vercel에 환경변수 등록 (`NOTION_*`)
+- [ ] 프로덕션 빌드 검증: `npm run check-all && npm run build`
+- [ ] 배포 후 Notion 수정 → 사이트 자동 반영(ISR) 확인
+- [ ] (선택) 커스텀 도메인 연결
+
+### ⏱️ 예상 소요: 1일
+
+### ✅ 완료 기준
+
+- 프로덕션 URL에서 모든 화면이 정상 동작한다
+- Notion 변경 사항이 설정한 주기 내에 자동 반영된다
+- Lighthouse 주요 지표 90점 이상
+- `npm run check-all`, `npm run build` 모두 통과
+
+---
+
+## 📌 진행 규칙
+
+- 단계는 **순서대로** 진행하며, 이전 단계의 완료 기준을 충족한 뒤 다음으로 넘어간다
+- 작업 완료 시 체크박스를 갱신한다 (`/docs:update-roadmap` 활용)
+- 매 작업 후 `npm run check-all`과 `npm run build`로 검증한다
