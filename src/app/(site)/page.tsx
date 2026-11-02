@@ -1,7 +1,7 @@
 import { Container } from '@/components/layout/container'
 import { CategoryFilter } from '@/components/recipes/category-filter'
 import { NotionSetupNotice } from '@/components/recipes/notion-setup-notice'
-import { RecipeGrid } from '@/components/recipes/recipe-grid'
+import { RecipeSearch } from '@/components/recipes/recipe-search'
 import { isNotionConfigured } from '@/lib/notion/client'
 import { getCategories, getRecipes } from '@/lib/notion/recipes'
 
@@ -25,7 +25,7 @@ export default async function HomePage() {
 
       {!isNotionConfigured() && <NotionSetupNotice />}
       <CategoryFilter categories={categories} />
-      <RecipeGrid recipes={recipes} />
+      <RecipeSearch recipes={recipes} />
     </Container>
   )
 }
